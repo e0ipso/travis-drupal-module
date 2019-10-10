@@ -1,0 +1,11 @@
+<?php
+
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_view_alter() for node entities.
+ */
+function pmt_node_view_alter(array &$build, EntityInterface $node, EntityViewDisplayInterface $display) {
+  var_dump('Hello!');
+}
