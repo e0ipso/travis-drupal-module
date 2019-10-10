@@ -12,4 +12,5 @@ composer require e0ipso/travis-drupal-module
 
 You are done. Yes, really.
 
-Enable the [Travis integration](https://travis-ci.com) for the repo, and see it work.
+Commit the generated files and push them to GitHub / GitLab / etc. Finally, enable the
+[Travis integration](https://travis-ci.com) for the repo, and see it work.
