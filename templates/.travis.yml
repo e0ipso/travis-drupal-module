@@ -1,0 +1,52 @@
+dist: xenial
+language: php
+php: 7.1
+cache:
+  directories:
+    - "$HOME/.composer/cache/files"
+
+services:
+  - mysql
+addons:
+  chrome: stable
+
+env:
+  global:
+    - PROJECT_NAME=drupal
+    - PROJECT_BASE_PATH=$HOME/$PROJECT_NAME
+    - DRUPAL_ROOT=$PROJECT_BASE_PATH/web
+    - SIMPLETEST_BASE_URL=http://127.0.0.1:8888
+    - DB_NAME=drupal
+    - SIMPLETEST_DB=mysql://travis@127.0.0.1/drupal
+
+branches:
+  only:
+    - /^8\.x\-[0-9]+\.x$/
+
+jobs:
+  include:
+    -
+      stage: test
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install jq unzip
+        # Download and extract chromedriver for JavascriptFunctional tests.
+        - wget -N https://chromedriver.storage.googleapis.com/77.0.3865.40/chromedriver_linux64.zip
+        - unzip chromedriver_linux64.zip
+        - chmod +x chromedriver
+        - sudo mv -f chromedriver /usr/local/share/chromedriver
+        # Fixes Composer exhausting the memory when using PHP 5.6.
+        - echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+        # Fix failing tests due to email sending.
+        - echo 'sendmail_path = /bin/true' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+        - mkdir $PROJECT_BASE_PATH
+        - mysql -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+      install: bash $TRAVIS_BUILD_DIR/.travis/scripts/install-drupal.sh $PROJECT_BASE_PATH
+      before_script: bash $TRAVIS_BUILD_DIR/.travis/scripts/start-webserver.sh $DRUPAL_ROOT &
+      script: bash $TRAVIS_BUILD_DIR/.travis/scripts/execute-tests.sh $DRUPAL_ROOT
+      after_script:
+        - mysql -e "DROP DATABASE $DB_NAME;"
+        - mysql -e "SHOW DATABASES;"
+        - killall php
+        - killall chromedriver
+        - if pgrep chrome; then pkill chrome; fi
