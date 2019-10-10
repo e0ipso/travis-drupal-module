@@ -2,7 +2,6 @@
 
 namespace TravisDrupalModule\Composer;
 
-use \RecursiveDirectoryIterator;
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
 use Composer\DependencyResolver\Operation\UpdateOperation;
@@ -15,12 +14,14 @@ use Composer\Package\RootPackageInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
+use RecursiveDirectoryIterator;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 
 final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriberInterface {
 
   const PACKAGE_NAME = 'e0ipso/travis-drupal-module';
+
   const GLUE = "\n  * ";
 
   /**
@@ -69,7 +70,6 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
    * When this package is updated, the git hook is also initialized.
    */
   public function postPackageInstall(PackageEvent $event) {
-    var_dump(__METHOD__);
     $operation = $event->getOperation();
     assert($operation instanceof InstallOperation);
     $package = $operation->getPackage();
@@ -86,7 +86,6 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
    * When this package is updated, the git hook is also updated.
    */
   public function postPackageUpdate(PackageEvent $event) {
-    var_dump(__METHOD__);
     $operation = $event->getOperation();
     assert($operation instanceof UpdateOperation);
     $package = $operation->getTargetPackage();
@@ -100,7 +99,6 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
   }
 
   public function postInstallCmd(Event $event) {
-    var_dump(__METHOD__);
     if (!$this->scheduled) {
       return;
     }
@@ -108,7 +106,6 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
   }
 
   public function postUpdateCmd(Event $event) {
-    var_dump(__METHOD__);
     if (!$this->scheduled) {
       return;
     }
@@ -125,7 +122,6 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
   }
 
   private function createRequiredFiles(Event $event) {
-    var_dump(__METHOD__);
     $fs = new Filesystem();
 
     $vendorDir = $this->composer->getConfig()->get('vendor-dir');
@@ -137,8 +133,16 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
     $packageDir = $this->composer->getInstallationManager()
       ->getInstallPath($currentPackage);
 
+    // The GrumPHP file is generate on install, we don't want that one. We want
+    // out own version.
+    $grumphpFilename = Path::join($rootDir, 'grumphp.yml');
+    if ($fs->exists($grumphpFilename)) {
+      $fs->remove($grumphpFilename);
+    }
     $this->validateTemplateLocations($fs, $packageDir, $rootDir);
     $this->copyTemplatesToRoot($fs, $packageDir, $rootDir);
+
+    // Leave a message of what we have done.
     $rootPackage = $this->composer->getPackage();
     assert($rootPackage instanceof RootPackageInterface);
     $msg = static::GLUE . implode(static::GLUE, array_values($this->computePathMappings($packageDir, $rootDir)));
@@ -151,7 +155,6 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
   }
 
   private function computePathMappings($packageDir, $rootDir) {
-    var_dump(__METHOD__);
     if (isset($this->pathMappings)) {
       return $this->pathMappings;
     }
@@ -172,7 +175,6 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
   }
 
   private function validateTemplateLocations(Filesystem $fs, $packageDir, $rootDir) {
-    var_dump(__METHOD__);
     $files = array_values($this->computePathMappings($packageDir, $rootDir));
     $existing_files = array_filter($files, function (string $file) use ($fs) {
       return $fs->exists($file);
@@ -185,7 +187,6 @@ final class TravisDrupalModulePlugin implements PluginInterface, EventSubscriber
   }
 
   private function copyTemplatesToRoot(Filesystem $fs, $packageDir, $rootDir) {
-    var_dump(__METHOD__);
     foreach ($this->computePathMappings($packageDir, $rootDir) as $source => $destination) {
       $this->copyRecursive($fs, $source, $destination);
     }
