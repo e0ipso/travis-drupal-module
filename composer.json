@@ -1,7 +1,7 @@
 {
   "name": "e0ipso/travis-drupal-module",
   "type": "composer-plugin",
-  "description": "Library to help CI setup without headaches.",
+  "description": "Library to help Travis CI setup without headaches for Drupal modules.",
   "keywords": [
     "Drupal",
     "Travis"
