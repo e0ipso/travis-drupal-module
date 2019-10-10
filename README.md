@@ -7,7 +7,7 @@ hard work of discovering the tools and setting this up yourself, then this tool 
 Go to the root of the repo for your module and run:
 
 ```
-composer require e0ipso/travis-drupal-module
+composer require --dev e0ipso/travis-drupal-module
 ```
 
 You are done. Yes, really.
