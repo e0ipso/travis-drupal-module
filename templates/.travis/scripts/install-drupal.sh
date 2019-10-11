@@ -30,7 +30,7 @@ echo -e "\t*   Installing Dependencies    *"
 echo -e "\t********************************"
 echo -e "\n\n\n"
 echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} $COMPOSER install\n\n"
-$COMPOSER install
+$COMPOSER install --no-dev --no-interaction --no-progress
 
 echo -e "\n\n\n"
 echo -e "\t********************************"
