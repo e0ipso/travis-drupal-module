@@ -1,0 +1,27 @@
+dist: xenial
+language: php
+php: 7.1
+cache:
+  directories:
+    - "$HOME/.composer/cache/files"
+
+branches:
+  only:
+    - master
+
+jobs:
+  include:
+    -
+      stage: test
+      install: composer install --no-interaction --no-progress
+      script: php $TRAVIS_BUILD_DIR/vendor/bin/grumphp run
+    -
+      stage: release
+      script: skip
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: npx semantic-release
+        on:
+          branch: master
+
