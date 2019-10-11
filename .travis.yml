@@ -17,6 +17,8 @@ jobs:
       script: php $TRAVIS_BUILD_DIR/vendor/bin/grumphp run
     -
       stage: release
+      install:
+        - npm install semantic-release-conventional-commits --no-save
       script: skip
       deploy:
         provider: script
