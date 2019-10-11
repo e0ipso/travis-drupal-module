@@ -6,7 +6,7 @@
     "Drupal",
     "Travis"
   ],
-  "homepage": "https://github.ibm.com/e0ipso/travis-drupal-module",
+  "homepage": "https://github.com/e0ipso/travis-drupal-module",
   "license": "GPL-2.0",
   "authors": [
     {
@@ -43,7 +43,7 @@
     }
   },
   "support": {
-    "issues": "https://github.ibm.com/e0ipso/travis-drupal-module/issues",
-    "source": "https://github.ibm.com/e0ipso/travis-drupal-module"
+    "issues": "https://github.com/e0ipso/travis-drupal-module/issues",
+    "source": "https://github.com/e0ipso/travis-drupal-module"
   }
 }
