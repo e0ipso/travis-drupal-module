@@ -101,8 +101,8 @@ final class TravisDrupalModulePlugin implements
         return [
         PackageEvents::POST_PACKAGE_INSTALL => 'postChangeInstall',
         PackageEvents::POST_PACKAGE_UPDATE => 'postChangeInstall',
-        ScriptEvents::POST_INSTALL_CMD => 'postInstallCmd',
-        ScriptEvents::POST_UPDATE_CMD => 'postUpdateCmd',
+        ScriptEvents::POST_INSTALL_CMD => 'postChangeCmd',
+        ScriptEvents::POST_UPDATE_CMD => 'postChangeCmd',
         ];
     }
 
@@ -129,34 +129,16 @@ final class TravisDrupalModulePlugin implements
     }
 
     /**
-     * After running an install command on this app we may need to initialize.
+     * After running a command on this app we may need to initialize.
      *
      * @return void
      */
-    public function postInstallCmd()
+    public function postChangeCmd()
     {
         if (!$this->_scheduled) {
             return;
         }
         $this->_createRequiredFiles();
-    }
-
-    /**
-     * After running an update command on this app we may need to initialize.
-     *
-     * @return void
-     */
-    public function postUpdateCmd()
-    {
-        if (!$this->_scheduled) {
-            return;
-        }
-        try {
-            $this->_createRequiredFiles();
-        } catch (\LogicException $exception) {
-            $this->_io
-                ->writeError('<fg=red>' . $exception->getMessage() . '</fg=red>');
-        }
     }
 
     /**
@@ -190,13 +172,14 @@ final class TravisDrupalModulePlugin implements
         $packageDir = $this->_composer->getInstallationManager()
             ->getInstallPath($currentPackage);
 
-        // The GrumPHP file is generate on install, we don't want that one. We want
-        // out own version.
+        // The GrumPHP file is generated on phppro/grumphp installation, we don't
+        // want that one. We want our own version.
         $grumphpFilename = Path::join($rootDir, 'grumphp.yml');
         if ($fsystem->exists($grumphpFilename)) {
             $fsystem->remove($grumphpFilename);
+            $message = 'Preexisting grumphp.yml file has been replaced.';
+            $this->_io->write('<fg=yellow>' . $message . '</fg=yellow>');
         }
-        $this->_validateTemplateLocations($fsystem, $packageDir, $rootDir);
         $this->_copyTemplatesToRoot($fsystem, $packageDir, $rootDir);
 
         // Leave a message of what we have done.
@@ -258,9 +241,10 @@ final class TravisDrupalModulePlugin implements
      * @param string     $packageDir The absolute path for the this package.
      * @param string     $rootDir    The absolute path for the root directory.
      *
-     * @return void
+     * @return string[]
+     *   Files to copy.
      */
-    private function _validateTemplateLocations(
+    private function _getValidTemplateLocations(
         Filesystem $fsystem,
         $packageDir,
         $rootDir
@@ -272,12 +256,12 @@ final class TravisDrupalModulePlugin implements
             }
         );
         if (empty($existing_files)) {
-            return;
+            return $files;
         }
-        $message = 'Unable to proceed the following files already exist. Back ';
-        $message .= 'them up and delete them to re-generate them:';
+        $message = 'Some files already exist and will not be overwritten:';
         $message .= static::GLUE . implode(static::GLUE, $existing_files);
-        throw new LogicException($message);
+        $this->_io->write('<fg=yellow>' . $message . '</fg=yellow>');
+        return array_diff($files, $existing_files);
     }
 
     /**
@@ -291,7 +275,11 @@ final class TravisDrupalModulePlugin implements
      */
     private function _copyTemplatesToRoot(Filesystem $fsystem, $packageDir, $rootDir)
     {
-        $mappings = $this->_computePathMappings($packageDir, $rootDir);
+        $mappings = $this->_getValidTemplateLocations(
+            $fsystem,
+            $packageDir,
+            $rootDir
+        );
         foreach ($mappings as $source => $destination) {
             $this->_copyRecursive($fsystem, $source, $destination);
         }
