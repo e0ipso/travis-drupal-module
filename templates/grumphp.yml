@@ -46,7 +46,6 @@ parameters:
         - css
         - info
         - txt
-        - md
     phpmd:
       ruleset: [cleancode, codesize, design, naming, unusedcode]
       triggered_by:
