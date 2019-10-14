@@ -24,7 +24,6 @@ use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
-use \LogicException;
 use \RecursiveDirectoryIterator;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
@@ -205,14 +204,18 @@ final class TravisDrupalModulePlugin implements
     /**
      * Given a source dir and a destination create the mappings of files to copy.
      *
-     * @param string $packageDir The absolute path for this package.
-     * @param string $rootDir    The absolute path for the root directory.
+     * @param Filesystem $fsystem    The filesystem component.
+     * @param string     $packageDir The absolute path for the this package.
+     * @param string     $rootDir    The absolute path for the root directory.
      *
      * @return string[]
      *   The keys are the origin paths and the values the destination paths.
      */
-    private function _computePathMappings($packageDir, $rootDir)
-    {
+    private function _computePathMappings(
+        Filesystem $fsystem,
+        $packageDir,
+        $rootDir
+    ) {
         if (isset($this->_pathMappings)) {
             return $this->_pathMappings;
         }
@@ -224,44 +227,25 @@ final class TravisDrupalModulePlugin implements
             $flags
         );
         $this->_pathMappings = [];
+        $existing_files = [];
         foreach ($iterator as $entry) {
             $destination = Path::join(
                 $rootDir,
                 Path::makeRelative($entry, $templateDir)
             );
+            if ($fsystem->exists($destination)) {
+                $existing_files[] = $destination;
+                continue;
+            }
             $this->_pathMappings[$entry] = $destination;
         }
-        return $this->_pathMappings;
-    }
-
-    /**
-     * Ensures that there are no conflicts when copying files.
-     *
-     * @param Filesystem $fsystem    The filesystem component.
-     * @param string     $packageDir The absolute path for the this package.
-     * @param string     $rootDir    The absolute path for the root directory.
-     *
-     * @return string[]
-     *   Files to copy.
-     */
-    private function _getValidTemplateLocations(
-        Filesystem $fsystem,
-        $packageDir,
-        $rootDir
-    ) {
-        $files = array_values($this->_computePathMappings($packageDir, $rootDir));
-        $existing_files = array_filter(
-            $files, function (string $file) use ($fsystem) {
-                return $fsystem->exists($file);
-            }
-        );
-        if (empty($existing_files)) {
-            return $files;
+        if (!empty($existing_files)) {
+            $message = 'Some files already exist and will not be overwritten:';
+            $message .= static::GLUE . implode(static::GLUE, $existing_files);
+            $this->_io->write('<fg=yellow>' . $message . '</fg=yellow>');
         }
-        $message = 'Some files already exist and will not be overwritten:';
-        $message .= static::GLUE . implode(static::GLUE, $existing_files);
-        $this->_io->write('<fg=yellow>' . $message . '</fg=yellow>');
-        return array_diff($files, $existing_files);
+
+        return $this->_pathMappings;
     }
 
     /**
@@ -275,11 +259,7 @@ final class TravisDrupalModulePlugin implements
      */
     private function _copyTemplatesToRoot(Filesystem $fsystem, $packageDir, $rootDir)
     {
-        $mappings = $this->_getValidTemplateLocations(
-            $fsystem,
-            $packageDir,
-            $rootDir
-        );
+        $mappings = $this->_computePathMappings($fsystem, $packageDir, $rootDir);
         foreach ($mappings as $source => $destination) {
             $this->_copyRecursive($fsystem, $source, $destination);
         }
@@ -299,6 +279,8 @@ final class TravisDrupalModulePlugin implements
     private function _copyRecursive(Filesystem $fsystem, $source, $destination)
     {
         if (!is_dir($source)) {
+            $message = sprintf('Copying %s to %s.', $source, $destination);
+            $this->_io->write($message, true, IOInterface::VERY_VERBOSE);
             $fsystem->copy($source, $destination);
             return;
         }
