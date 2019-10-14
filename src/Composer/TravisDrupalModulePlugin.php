@@ -15,6 +15,7 @@
 namespace TravisDrupalModule\Composer;
 
 use Composer\Composer;
+use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Installer\PackageEvent;
 use Composer\Installer\PackageEvents;
@@ -115,7 +116,9 @@ final class TravisDrupalModulePlugin implements
     public function postChangeInstall(PackageEvent $event)
     {
         $operation = $event->getOperation();
-        $package = $operation->getPackage();
+        $package = $event instanceof UpdateOperation
+            ? $operation->getInitialPackage()
+            : $operation->getPackage();
 
         if (!$this->_isCurrentPackage($package)) {
             return;
