@@ -185,7 +185,7 @@ final class TravisDrupalModulePlugin implements
         assert($rootPackage instanceof RootPackageInterface);
         $msg = static::GLUE . implode(
             static::GLUE, array_values(
-                $this->_computePathMappings($packageDir, $rootDir)
+                $this->_computePathMappings($fsystem, $packageDir, $rootDir)
             )
         );
         $tpl  = "\n<fg=green>%s successfully copied the following files in ";
