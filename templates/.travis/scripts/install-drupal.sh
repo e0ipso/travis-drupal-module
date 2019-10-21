@@ -5,6 +5,8 @@ BASE_DIR="$(dirname $(dirname $(cd ${0%/*} && pwd)))"
 COMPOSER="$(which composer)"
 COMPOSER_BIN_DIR="$(composer config bin-dir)"
 DOCROOT="web"
+MODULE_NAME=$(basename ${TRAVIS_BUILD_DIR})
+PACKAGE_NAME=$(cat ${TRAVIS_BUILD_DIR}/composer.json|jq '.name'|sed -e 's:"::g')
 
 # Define the color scheme.
 FG_C='\033[1;37m'
@@ -71,8 +73,14 @@ $COMPOSER require "phpunit/phpunit:^6.5" --no-progress
 echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} mkdir -p ${DEST_DIR}/${DOCROOT}/modules/contrib\n\n"
 mkdir -p ${DEST_DIR}/${DOCROOT}/modules/contrib
 mkdir -p ${DEST_DIR}/${DOCROOT}/sites/simpletest/browser_output
-echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} ln -s ${TRAVIS_BUILD_DIR} ${DEST_DIR}/${DOCROOT}/modules/contrib/$(basename ${TRAVIS_BUILD_DIR})\n\n"
-ln -s ${TRAVIS_BUILD_DIR} ${DEST_DIR}/${DOCROOT}/modules/contrib/$(basename ${TRAVIS_BUILD_DIR})
+
+# Link the current module using composer. Otherwise the autoload will not have the necessary classes
+# for the Unit tests.
+echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} ${COMPOSER} config repositories.${MODULE_NAME} path ${TRAVIS_BUILD_DIR}\n\n"
+${COMPOSER} config repositories.${MODULE_NAME} path ${TRAVIS_BUILD_DIR}
+echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} ${COMPOSER} require ${PACKAGE_NAME} --no-interaction --no-progress --no-suggest\n\n"
+${COMPOSER} require ${PACKAGE_NAME} --no-interaction --no-progress --no-suggest
+
 # This module depends on others. Since we are installing this manually (no composer) we need to pull
 # in the dependencies. They are in the vendor directory.
 for package in $(cat ${TRAVIS_BUILD_DIR}/composer.json|jq '.require'|grep ':'|sed -e 's:^[^\"]*\"::g' -e 's:\".*::g');
