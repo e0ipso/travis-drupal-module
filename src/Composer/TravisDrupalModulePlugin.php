@@ -25,7 +25,6 @@ use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
 use \RecursiveDirectoryIterator;
 use Symfony\Component\Filesystem\Filesystem;
-use Webmozart\PathUtil\Path;
 
 /**
  * Composer plugin that copies the templates to their right location.
@@ -162,7 +161,7 @@ final class TravisDrupalModulePlugin implements
         $fsystem = new Filesystem();
 
         $vendorDir = $this->_composer->getConfig()->get('vendor-dir');
-        $rootDir = Path::getDirectory($vendorDir);
+        $rootDir = dirname($vendorDir);
 
         $currentPackage = $this->_composer
             ->getRepositoryManager()
@@ -172,7 +171,10 @@ final class TravisDrupalModulePlugin implements
 
         // The GrumPHP file is generated on phppro/grumphp installation, we don't
         // want that one. We want our own version.
-        $grumphpFilename = Path::join($rootDir, 'grumphp.yml');
+        $grumphpFilename = implode(
+            DIRECTORY_SEPARATOR,
+            [$rootDir, 'grumphp.yml']
+        );
         if ($fsystem->exists($grumphpFilename)) {
             $fsystem->remove($grumphpFilename);
             $message = 'Preexisting grumphp.yml file has been replaced.';
@@ -218,7 +220,7 @@ final class TravisDrupalModulePlugin implements
         if (isset($this->_pathMappings)) {
             return $this->_pathMappings;
         }
-        $templateDir = Path::join($packageDir, 'templates');
+        $templateDir = implode(DIRECTORY_SEPARATOR, [$packageDir, 'templates']);
         $flags = RecursiveDirectoryIterator::SKIP_DOTS
           | RecursiveDirectoryIterator::CURRENT_AS_PATHNAME;
         $iterator = new RecursiveDirectoryIterator(
@@ -228,9 +230,9 @@ final class TravisDrupalModulePlugin implements
         $this->_pathMappings = [];
         $existing_files = [];
         foreach ($iterator as $entry) {
-            $destination = Path::join(
-                $rootDir,
-                Path::makeRelative($entry, $templateDir)
+            $destination = implode(
+                DIRECTORY_SEPARATOR,
+                [$rootDir, $this->_makeRelative($entry, $templateDir)]
             );
             if ($fsystem->exists($destination)) {
                 $existing_files[] = $destination;
@@ -292,12 +294,29 @@ final class TravisDrupalModulePlugin implements
         );
         $fsystem->mkdir($destination);
         foreach ($iterator as $entry) {
-            $new_destination = Path::join(
-                $destination,
-                Path::makeRelative($entry, $source)
+            $new_destination = implode(
+                DIRECTORY_SEPARATOR,
+                [$destination, $this->_makeRelative($entry, $source)]
             );
             $this->_copyRecursive($fsystem, $entry, $new_destination);
         }
     }
 
+    /**
+     * Makes a path relative to a directory.
+     *
+     * @param string $path      The filesystem path.
+     * @param string $directory The directory to make things relative to.
+     *
+     * @return string
+     *   The relativized path.
+     */
+    private function _makeRelative(string $path, string $directory)
+    {
+        $pos = strpos($path, $directory);
+        if ($pos !== 0) {
+            return $path;
+        }
+        return ltrim(substr($path, strlen($directory)), '/') ?: '';
+    }
 }
