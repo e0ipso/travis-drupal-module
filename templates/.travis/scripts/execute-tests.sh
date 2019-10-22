@@ -18,8 +18,6 @@ NO_C='\033[0m'
 cd ${DOCROOT}/.. || exit 2
 echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} ${COMPOSER} require ${PACKAGE_NAME} \"phpunit/phpunit:^6.5\" --no-interaction --no-progress --no-suggest\n\n"
 ${COMPOSER} require ${PACKAGE_NAME} "phpunit/phpunit:^6.5" --no-interaction --no-progress --no-suggest
-ls -lisa ${DOCROOT}/modules/contrib
-cat $( dirname ${DOCROOT} )/composer.json|jq ".repositories.${MODULE_NAME}"
 
 # Execute the static code analysis tasks.
 cd ${TRAVIS_BUILD_DIR} || exit 2
