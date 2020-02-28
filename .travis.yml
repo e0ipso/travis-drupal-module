@@ -17,6 +17,10 @@ jobs:
       script: php $TRAVIS_BUILD_DIR/vendor/bin/grumphp run
     -
       stage: release
+      language: node_js
+      node_js: 'lts/dubnium'
+      before_install:
+        - git fetch origin --tags
       install:
         - npm install semantic-release-conventional-commits --no-save
       script: skip
@@ -26,4 +30,3 @@ jobs:
         script: npx semantic-release
         on:
           branch: master
-
