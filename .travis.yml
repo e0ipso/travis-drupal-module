@@ -13,6 +13,7 @@ jobs:
   include:
     -
       stage: test
+      before_install: composer self-update --1
       install: composer install --no-interaction --no-progress
       script: php $TRAVIS_BUILD_DIR/vendor/bin/grumphp run
     -
