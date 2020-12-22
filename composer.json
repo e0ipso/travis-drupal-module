@@ -15,7 +15,7 @@
     }
   ],
   "require": {
-    "php": ">=7.1",
+    "php": ">=7.3",
     "composer-plugin-api": "^1.1",
     "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
     "drupal/coder": "^8.2",
