@@ -127,7 +127,7 @@ final class TravisDrupalModulePlugin implements
     public function postChangeInstall(PackageEvent $event)
     {
         $operation = $event->getOperation();
-        $package = $operation->getJobType() === 'update'
+        $package = $operation->getOperationType() === 'update'
             ? $operation->getTargetPackage()
             : $operation->getPackage();
 
