@@ -33,7 +33,6 @@ grumphp:
           blacklist: [var_dump]
       metadata:
         priority: 100000
-    securitychecker: ~
     phplint: ~
   ascii:
     failed: vendor/phpro/grumphp/resources/ascii/failed.txt
