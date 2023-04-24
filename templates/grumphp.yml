@@ -1,6 +1,5 @@
 grumphp:
   additional_info: "\nVisit https://github.com/e0ipso/travis-drupal-module#readme for documentation!\n"
-  hooks_preset: local
   stop_on_failure: false
   ignore_unstaged_changes: false
   hide_circumvention_tip: false
