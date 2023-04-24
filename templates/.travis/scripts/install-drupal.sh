@@ -52,7 +52,7 @@ echo "-----------------------------------------------"
 echo " Downloading Drupal using composer "
 echo "-----------------------------------------------"
 echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} ${COMPOSER} create-project drupal-composer/drupal-project:8.x-dev ${DEST_DIR} --stability dev --no-interaction --no-install\n\n"
-${COMPOSER} create-project drupal-composer/drupal-project:8.x-dev ${DEST_DIR} --stability dev --no-interaction --no-install
+${COMPOSER} create-project drupal-composer/drupal-project:10.x-dev ${DEST_DIR} --stability dev --no-interaction --no-install
 
 if [ $? -ne 0 ]; then
   echo -e "${FG_C}${EBG_C} ERROR ${NO_C} There was a problem setting up Drupal using composer."
