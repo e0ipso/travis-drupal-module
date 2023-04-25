@@ -40,5 +40,5 @@ grumphp:
       run_always: false
     phplint: ~
   ascii:
-    failed: vendor/phpro/grumphp/resources/ascii/failed.txt
-    succeeded: vendor/phpro/grumphp/resources/ascii/succeeded.txt
+    failed: failed.txt
+    succeeded: succeeded.txt
