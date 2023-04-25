@@ -15,6 +15,8 @@ grumphp:
         - types: ['build', 'ci', 'chore', 'docs', 'feat', 'fix', 'perf', 'refactor', 'revert', 'style', 'test']
         - scopes: ['schema', 'form', 'drupal', 'api']
       max_subject_width: 50
+      enforce_no_subject_punctuations: true
+      enforce_no_subject_trailing_period: true
     git_branch_name:
       whitelist:
         - '/((build|ci|chore|docs|feat|fix|perf|refactor|revert|style|test)\/[a-z0-9-]+|8.x-[0-9]+.x|master)/'
@@ -54,7 +56,10 @@ grumphp:
           blacklist: [var_dump]
       metadata:
         priority: 100000
+    securitychecker_enlightn:
+      lockfile: ./composer.lock
+      run_always: false
     phplint: ~
   ascii:
-    failed: vendor/phpro/grumphp/resources/ascii/failed.txt
-    succeeded: vendor/phpro/grumphp/resources/ascii/succeeded.txt
+    failed: failed.txt
+    succeeded: succeeded.txt
