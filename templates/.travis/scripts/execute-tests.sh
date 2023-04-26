@@ -15,8 +15,8 @@ NO_C='\033[0m'
 # Link the current module using composer. Otherwise the autoload will not have the necessary classes
 # for the Unit tests.
 cd ${DOCROOT}/.. || exit 2
-echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} ${COMPOSER} require \"phpunit/phpunit:^6.5\" --no-interaction --no-progress --no-suggest\n\n"
-${COMPOSER} require "phpunit/phpunit:^6.5" --no-interaction --no-progress --no-suggest
+echo -e "${FG_C}${BG_C} EXECUTING ${NO_C} ${COMPOSER} require \"phpunit/phpunit:^9.5\" --no-interaction --no-progress --no-suggest\n\n"
+${COMPOSER} require "phpunit/phpunit:^9.5" --no-interaction --no-progress --no-suggest
 
 # Execute the static code analysis tasks.
 cd ${TRAVIS_BUILD_DIR} || exit 2
