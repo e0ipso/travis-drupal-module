@@ -24,7 +24,7 @@
     "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
     "drupal/coder": "^8.2",
     "enlightn/security-checker": "^1.10",
-    "localheinz/composer-normalize": "^2.4",
+    "ergebnis/composer-normalize": "^2.30",
     "nikic/php-parser": "^4.2",
     "php-parallel-lint/php-parallel-lint": "^1.0",
     "phpmd/phpmd": "^2",
@@ -43,8 +43,8 @@
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
-      "localheinz/composer-normalize": true,
-      "phpro/grumphp-shim": true
+      "phpro/grumphp-shim": true,
+      "ergebnis/composer-normalize": true
     }
   },
   "extra": {
